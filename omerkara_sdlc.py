@@ -16,12 +16,28 @@ async def main():
     # Get configuration
     task_token = os.getenv("TASK_TOKEN")
     task_api = os.getenv("TASK_API", "https://n8n.omerkara.com/webhook")
-    task_project = os.getenv("TASK_PROJECT", "default")
+    task_project = os.getenv("TASK_PROJECT")
     
+    # Prompt for TASK_TOKEN if not set
     if not task_token:
-        print("❌ TASK_TOKEN not set")
-        print("   export TASK_TOKEN=your-token-from-tasks.omerkara.com")
-        return
+        print("🔐 TASK_TOKEN required")
+        print("   Get your token from: https://tasks.omerkara.com/login")
+        print()
+        task_token = input("Enter TASK_TOKEN: ").strip()
+        if not task_token:
+            print("❌ TASK_TOKEN is required")
+            return
+    
+    # Prompt for TASK_PROJECT if not set
+    if not task_project:
+        print("📦 TASK_PROJECT required")
+        print("   Which project are you working on?")
+        print("   (e.g., rivalsense, duqme, deployment-orchestrator)")
+        print()
+        task_project = input("Enter TASK_PROJECT: ").strip()
+        if not task_project:
+            print("❌ TASK_PROJECT is required")
+            return
     
     print(f"📦 Initializing project context...")
     print(f"   Project: {task_project}")

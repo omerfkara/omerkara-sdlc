@@ -1,0 +1,26 @@
+{
+  "name": "omerkara-sdlc-marketplace",
+  "displayName": "Ömer Kara SDLC",
+  "description": "Project context initialization and task management",
+  "owner": {
+    "name": "Ömer Faruk Kara",
+    "url": "https://github.com/omerfkara"
+  },
+  "homepage": "https://github.com/omerfkara/omerkara-sdlc",
+  "repository": "https://github.com/omerfkara/omerkara-sdlc",
+  "version": "1.0.0",
+  "license": "MIT",
+  "plugins": [
+    {
+      "id": "omerkara-sdlc",
+      "name": "Ömer Kara SDLC",
+      "version": "1.0.0",
+      "description": "Project context initialization - Fetch tasks, load PROMPT/SCOPE, auto-generate documentation",
+      "author": "Ömer Faruk Kara",
+      "type": "skill",
+      "repository": "https://github.com/omerfkara/omerkara-sdlc",
+      "homepage": "https://github.com/omerfkara/omerkara-sdlc",
+      "license": "MIT"
+    }
+  ]
+}

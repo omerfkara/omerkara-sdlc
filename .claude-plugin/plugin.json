@@ -1,0 +1,49 @@
+{
+  "id": "omerkara-sdlc",
+  "name": "Ömer Kara SDLC",
+  "version": "1.0.0",
+  "description": "Project context initialization for Claude Code - Fetch tasks, load PROMPT/SCOPE, auto-generate missing documentation",
+  "author": "Ömer Faruk Kara",
+  "homepage": "https://github.com/omerfkara/omerkara-sdlc",
+  "repository": "https://github.com/omerfkara/omerkara-sdlc",
+  "license": "MIT",
+  "keywords": [
+    "task-management",
+    "project-initialization",
+    "documentation",
+    "claude-code",
+    "sdlc"
+  ],
+  "skills": [
+    {
+      "id": "omerkara-sdlc",
+      "name": "SDLC Initialization",
+      "description": "Initialize project context with tasks, documentation, and environment setup",
+      "path": "SKILL.md"
+    }
+  ],
+  "configuration": {
+    "environment": {
+      "required": [
+        "TASK_TOKEN"
+      ],
+      "optional": [
+        "TASK_API",
+        "TASK_PROJECT"
+      ]
+    }
+  },
+  "categories": [
+    "development",
+    "productivity",
+    "automation"
+  ],
+  "installationInstructions": "After installing, set TASK_TOKEN environment variable and invoke /omerkara-sdlc",
+  "features": [
+    "Load project tasks from n8n API",
+    "Fetch project documentation (PROMPT, SCOPE, etc.)",
+    "Auto-generate missing documentation with templates",
+    "Interactive project initialization",
+    "Full task API integration"
+  ]
+}

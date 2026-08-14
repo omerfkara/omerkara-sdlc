@@ -2,12 +2,14 @@
 """
 Ömer Kara SDLC Skill - Project context initialization
 Fetches tasks and documentation from n8n task API
+Supports task and document management
 """
 
 import os
 import json
 import httpx
 import asyncio
+import sys
 from datetime import datetime
 
 async def main():
@@ -97,6 +99,177 @@ async def main():
     print(f"   • Documents: {len(doc_names)}")
     print(f"   • Status: Ready to develop")
     print()
+    
+    # Offer interactive mode
+    print("Would you like to manage tasks/documents? (y/n)")
+    response = input("Enter choice: ").strip().lower()
+    if response == 'y':
+        await handle_interactive_commands(task_token, task_api, task_project)
+
+async def create_task(task_token: str, task_api: str, task_project: str, title: str, priority: str = "medium", assignee: str = None):
+    """Create a new task in n8n"""
+    headers = {"X-Task-Token": task_token}
+    payload = {
+        "project": task_project,
+        "title": title,
+        "priority": priority,
+        "status": "todo"
+    }
+    if assignee:
+        payload["assignee"] = assignee
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{task_api}/tasks/create",
+                json=payload,
+                headers=headers,
+                timeout=10.0
+            )
+            response.raise_for_status()
+            task = response.json().get("task", {})
+            print(f"✅ Created task: {title} (#{task.get('id')})")
+            return task
+    except Exception as e:
+        print(f"❌ Failed to create task: {e}")
+        return None
+
+
+async def update_task(task_token: str, task_api: str, task_id: str, status: str = None, title: str = None, priority: str = None):
+    """Update an existing task"""
+    headers = {"X-Task-Token": task_token}
+    payload = {"id": task_id}
+    if status:
+        payload["status"] = status
+    if title:
+        payload["title"] = title
+    if priority:
+        payload["priority"] = priority
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.put(
+                f"{task_api}/tasks/update",
+                json=payload,
+                headers=headers,
+                timeout=10.0
+            )
+            response.raise_for_status()
+            print(f"✅ Updated task #{task_id}")
+            return response.json().get("task")
+    except Exception as e:
+        print(f"❌ Failed to update task: {e}")
+        return None
+
+
+async def upsert_document(task_token: str, task_api: str, task_project: str, name: str, content: str):
+    """Create or update a document (PROMPT, SCOPE, etc.)"""
+    headers = {"X-Task-Token": task_token}
+    payload = {
+        "project": task_project,
+        "name": name,
+        "content": content
+    }
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{task_api}/documents/upsert",
+                json=payload,
+                headers=headers,
+                timeout=10.0
+            )
+            response.raise_for_status()
+            print(f"✅ Saved document: {name}")
+            return response.json().get("document")
+    except Exception as e:
+        print(f"❌ Failed to save document: {e}")
+        return None
+
+
+async def delete_task(task_token: str, task_api: str, task_id: str):
+    """Delete a task"""
+    headers = {"X-Task-Token": task_token}
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.delete(
+                f"{task_api}/tasks/delete",
+                json={"id": task_id},
+                headers=headers,
+                timeout=10.0
+            )
+            response.raise_for_status()
+            print(f"✅ Deleted task #{task_id}")
+            return True
+    except Exception as e:
+        print(f"❌ Failed to delete task: {e}")
+        return False
+
+
+async def handle_interactive_commands(task_token: str, task_api: str, task_project: str):
+    """Allow interactive task/document management"""
+    print()
+    print("💡 Available commands:")
+    print("   create-task <title>              Create new task")
+    print("   update-task <id> <status>        Update task status (todo, in_progress, done)")
+    print("   save-doc <name> <content>        Save document (PROMPT, SCOPE, etc.)")
+    print("   delete-task <id>                 Delete task")
+    print("   exit                             Exit skill")
+    print()
+    
+    while True:
+        try:
+            cmd = input("Command: ").strip().split(" ", 1)
+            if not cmd or not cmd[0]:
+                continue
+            
+            command = cmd[0]
+            args = cmd[1] if len(cmd) > 1 else ""
+            
+            if command == "exit":
+                print("👋 Goodbye!")
+                break
+            elif command == "create-task":
+                if not args:
+                    title = input("Task title: ").strip()
+                else:
+                    title = args
+                if title:
+                    await create_task(task_token, task_api, task_project, title)
+            elif command == "update-task":
+                parts = args.split(" ", 1)
+                if len(parts) >= 2:
+                    task_id, status = parts[0], parts[1]
+                    await update_task(task_token, task_api, task_id, status=status)
+                else:
+                    print("Usage: update-task <id> <status>")
+            elif command == "save-doc":
+                parts = args.split(" ", 1)
+                if len(parts) >= 2:
+                    name, content = parts[0], parts[1]
+                    await upsert_document(task_token, task_api, task_project, name, content)
+                else:
+                    print("Usage: save-doc <name> <content>")
+            elif command == "delete-task":
+                task_id = args.strip()
+                if task_id:
+                    await delete_task(task_token, task_api, task_id)
+                else:
+                    print("Usage: delete-task <id>")
+            else:
+                print(f"Unknown command: {command}")
+        except KeyboardInterrupt:
+            print("\n👋 Goodbye!")
+            break
+        except Exception as e:
+            print(f"Error: {e}")
+
 
 if __name__ == "__main__":
     asyncio.run(main())
+    
+    # Check for command-line arguments
+    if len(sys.argv) > 1:
+        # Could be used for non-interactive mode
+        pass

@@ -213,9 +213,18 @@ async def handle_interactive_commands(task_token: str, task_api: str, task_proje
     print("💡 Available commands:")
     print("   create-task <title>              Create new task")
     print("   update-task <id> <status>        Update task status (todo, in_progress, done)")
-    print("   save-doc <name> <content>        Save document (PROMPT, SCOPE, etc.)")
+    print("   save-doc [name]                  Save document (prompts for type if not specified)")
     print("   delete-task <id>                 Delete task")
+    print("   doc-types                        Show all available document types")
+    print("   help                             Show this help message")
     print("   exit                             Exit skill")
+    print()
+    print("Examples:")
+    print("   save-doc DESIGN_SYSTEM           → Prompt for content")
+    print("   update-task 1 in_progress        → Start task")
+    print("   create-task Add login flow       → Create new task")
+    print()
+    print("💡 Tip: Use 'doc-types' to see all available document types")
     print()
     
     while True:
@@ -230,6 +239,23 @@ async def handle_interactive_commands(task_token: str, task_api: str, task_proje
             if command == "exit":
                 print("👋 Goodbye!")
                 break
+            elif command == "help":
+                print()
+                print("💡 Available commands:")
+                print("   create-task <title>              Create new task")
+                print("   update-task <id> <status>        Update task status (todo, in_progress, done)")
+                print("   save-doc [name]                  Save document (prompts for type if not specified)")
+                print("   delete-task <id>                 Delete task")
+                print("   doc-types                        Show all available document types")
+                print("   help                             Show this help message")
+                print("   exit                             Exit skill")
+                print()
+                print("Examples:")
+                print("   save-doc DESIGN_SYSTEM           → Prompt for content")
+                print("   update-task 1 in_progress        → Start task")
+                print("   create-task Add login flow       → Create new task")
+                print()
+                continue
             elif command == "create-task":
                 if not args:
                     title = input("Task title: ").strip()
@@ -245,18 +271,63 @@ async def handle_interactive_commands(task_token: str, task_api: str, task_proje
                 else:
                     print("Usage: update-task <id> <status>")
             elif command == "save-doc":
-                parts = args.split(" ", 1)
-                if len(parts) >= 2:
-                    name, content = parts[0], parts[1]
-                    await upsert_document(task_token, task_api, task_project, name, content)
+                if args.strip():
+                    name = args.strip()
                 else:
-                    print("Usage: save-doc <name> <content>")
+                    print("Document types:")
+                    print("  Project: PROMPT, SCOPE, ARCHITECTURE, DEPLOYMENT")
+                    print("  Design: DESIGN, DESIGN_SYSTEM, UI_GUIDELINES, STYLE_GUIDE,")
+                    print("          DESIGN_TOKENS, WIREFRAMES, PROTOTYPES, COMPONENT_LIBRARY,")
+                    print("          ACCESSIBILITY, BRAND_GUIDELINES")
+                    name = input("Document name: ").strip().upper()
+                
+                if name:
+                    print(f"Enter content for {name} (Ctrl+D or Ctrl+Z then Enter to finish):")
+                    lines = []
+                    try:
+                        while True:
+                            line = input()
+                            lines.append(line)
+                    except EOFError:
+                        pass
+                    content = "\n".join(lines)
+                    if content.strip():
+                        await upsert_document(task_token, task_api, task_project, name, content)
+                    else:
+                        print("No content provided")
+                else:
+                    print("Document name required")
             elif command == "delete-task":
                 task_id = args.strip()
                 if task_id:
                     await delete_task(task_token, task_api, task_id)
                 else:
                     print("Usage: delete-task <id>")
+            elif command == "doc-types":
+                print()
+                print("📋 Available Document Types:")
+                print()
+                print("🎯 Project Documents:")
+                print("   PROMPT          — Project requirements and objectives")
+                print("   SCOPE           — Project scope and boundaries")
+                print("   ARCHITECTURE    — Architecture decisions and patterns")
+                print("   DEPLOYMENT      — Deployment guide and procedures")
+                print()
+                print("🎨 Design Documents:")
+                print("   DESIGN          — General design overview")
+                print("   DESIGN_SYSTEM   — Design system specification")
+                print("   UI_GUIDELINES   — UI/UX guidelines and standards")
+                print("   STYLE_GUIDE     — Visual style guide")
+                print("   DESIGN_TOKENS   — Colors, typography, spacing, etc.")
+                print("   WIREFRAMES      — Wireframe documentation")
+                print("   PROTOTYPES      — Prototype specifications")
+                print("   COMPONENT_LIBRARY — Component library docs")
+                print("   ACCESSIBILITY   — Accessibility guidelines (WCAG, a11y)")
+                print("   BRAND_GUIDELINES — Brand guidelines and identity")
+                print()
+                print("💡 Usage: save-doc <type_name>")
+                print()
+                continue
             else:
                 print(f"Unknown command: {command}")
         except KeyboardInterrupt:

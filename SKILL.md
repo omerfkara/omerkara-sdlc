@@ -64,6 +64,46 @@ All requests require `X-Task-Token` header.
 4. Work complete → Mark task as `done`
 5. New issue found → Create task (no permission needed)
 
+## Document Types Supported
+
+### Project Documents
+- **PROMPT** — Project requirements
+- **SCOPE** — Project scope
+- **ARCHITECTURE** — Architecture decisions
+- **DEPLOYMENT** — Deployment guide
+
+### Design Documents
+- **DESIGN** — General design document
+- **DESIGN_SYSTEM** — Design system specification
+- **UI_GUIDELINES** — UI/UX guidelines
+- **STYLE_GUIDE** — Visual style guide
+- **DESIGN_TOKENS** — Design tokens (colors, typography, spacing)
+- **WIREFRAMES** — Wireframe documentation
+- **PROTOTYPES** — Prototype specifications
+- **COMPONENT_LIBRARY** — Component library documentation
+- **ACCESSIBILITY** — Accessibility guidelines
+- **BRAND_GUIDELINES** — Brand guidelines
+
+### Usage
+
+In interactive mode:
+```
+Command: save-doc DESIGN
+DESIGN content: # Design Overview...
+✅ Saved document: DESIGN
+
+Command: save-doc DESIGN_SYSTEM
+DESIGN_SYSTEM content: # Design System...
+✅ Saved document: DESIGN_SYSTEM
+```
+
+Or prompt at command line:
+```
+Document name: DESIGN_TOKENS
+Content: [paste or type design tokens...]
+✅ Saved document: DESIGN_TOKENS
+```
+
 ## Troubleshooting
 
 **"TASK_TOKEN not found"**

@@ -1,124 +1,109 @@
 # Ömer Kara SDLC Skill
 
-Initializes project context by fetching tasks and documentation from n8n task API.
+You are an SDLC project context initializer. When triggered with `/omerkara-sdlc`, follow these steps:
 
-## What It Does
+## Step 1: Get Configuration
 
-When triggered with `/omerkara-sdlc`, this skill:
+Ask the user for these if not in environment:
+- **TASK_TOKEN** (required) - "Get from: https://tasks.omerkara.com/login"
+- **TASK_PROJECT** (required) - "Project slug (e.g., rivalsense, duqme)"
+- **TASK_API** (optional) - Default: https://n8n.omerkara.com/webhook
 
-1. **Fetches Tasks** from n8n API using `TASK_TOKEN`
-2. **Loads Documentation** (PROMPT.md, SCOPE.md, etc.)
-3. **Auto-generates Missing Files** with templates
-4. **Summarizes Context** for the current session
+## Step 2: Load Tasks from n8n API
+
+Make a GET request to: `{TASK_API}/tasks?project={TASK_PROJECT}&status=open`
+Headers: `X-Task-Token: {TASK_TOKEN}`
+
+Display results:
+- List all open tasks
+- Show task IDs and titles
+- Group by priority if available
+
+## Step 3: Load Documents
+
+Make a GET request to: `{TASK_API}/documents?project={TASK_PROJECT}`
+Headers: `X-Task-Token: {TASK_TOKEN}`
+
+Display:
+- Available documents (PROMPT, SCOPE, DESIGN, etc.)
+- Brief content preview if available
+
+## Step 4: Show Project Summary
+
+Display:
+- Total open tasks
+- Available documents
+- Project status ready
+
+## Step 5: Offer Interactive Mode
+
+Ask: "Would you like to manage tasks or documents? (yes/no)"
+
+If yes, provide these command options:
+
+**Task Management:**
+- `create-task <title>` → Create new task
+- `update-task <id> <status>` → Update task (todo, in_progress, done)
+- `delete-task <id>` → Delete task
+
+**Document Management:**
+- `save-doc <type> <content>` → Save document
+- `doc-types` → Show all document types (DESIGN_SYSTEM, UI_GUIDELINES, DESIGN_TOKENS, etc.)
+- `load-doc <name>` → Load document content
+
+## Step 6: Interactive Loop
+
+For each command:
+1. Parse the command
+2. Execute API call if needed
+3. Show result
+4. Offer next command
+5. Continue until user says "exit" or "done"
 
 ## Configuration
 
-Required environment variable:
-```bash
-export TASK_TOKEN=your-token-from-tasks.omerkara.com
+Get from environment or prompt:
+```
+TASK_TOKEN=from-environment-or-ask-user
+TASK_PROJECT=from-environment-or-ask-user
+TASK_API=https://n8n.omerkara.com/webhook (default)
 ```
 
-Optional:
-```bash
-export TASK_API=https://n8n.omerkara.com/webhook
-export TASK_PROJECT=project-slug
-```
+## API Details
 
-## Usage
+All requests require header: `X-Task-Token: {TASK_TOKEN}`
 
-In Claude Code:
+**Endpoints:**
+- GET `/tasks?project=X&status=open` → List open tasks
+- POST `/tasks/create` → Create task
+- PUT `/tasks/update` → Update task
+- DELETE `/tasks/delete` → Delete task
+- GET `/documents?project=X` → List documents
+- POST `/documents/upsert` → Save document
+- DELETE `/documents` → Delete document
 
-```
-/omerkara-sdlc
-```
+## Supported Document Types
 
-This will:
-- Load all open tasks for your project
-- Pull PROMPT.md and SCOPE.md
-- Create missing documentation
-- Prime context for development
+**Project:** PROMPT, SCOPE, ARCHITECTURE, DEPLOYMENT
+**Design:** DESIGN, DESIGN_SYSTEM, UI_GUIDELINES, STYLE_GUIDE, DESIGN_TOKENS, WIREFRAMES, PROTOTYPES, COMPONENT_LIBRARY, ACCESSIBILITY, BRAND_GUIDELINES
+
+## Example Flow
+
+User: `/omerkara-sdlc`
+→ Ask for TASK_TOKEN (if not in env)
+→ Ask for TASK_PROJECT (if not in env)
+→ Load 5 open tasks
+→ Load 2 documents (PROMPT, DESIGN_SYSTEM)
+→ Show summary
+→ Ask if user wants interactive mode
+→ If yes: provide command prompt
+→ User types: `save-doc UI_GUIDELINES`
+→ You ask for content
+→ You POST to `/documents/upsert`
+→ Show result and continue
 
 ## Files
 
-- `omerkara_sdlc.py` — Main skill implementation
-- `SKILL.md` — This file (Claude learns this)
-- `.claude-plugin/plugin.json` — Plugin metadata
-
-## API Integration
-
-Uses n8n task API at `https://n8n.omerkara.com/webhook`
-
-Endpoints:
-- GET `/tasks` — List tasks
-- POST `/tasks/create` — Create task
-- GET `/documents` — List documents
-- POST `/documents/upsert` — Update document
-
-All requests require `X-Task-Token` header.
-
-## Task Workflow
-
-1. Session starts → `/omerkara-sdlc` loads context
-2. User describes work → Skill creates task
-3. Starting work → Update task to `in_progress`
-4. Work complete → Mark task as `done`
-5. New issue found → Create task (no permission needed)
-
-## Document Types Supported
-
-### Project Documents
-- **PROMPT** — Project requirements
-- **SCOPE** — Project scope
-- **ARCHITECTURE** — Architecture decisions
-- **DEPLOYMENT** — Deployment guide
-
-### Design Documents
-- **DESIGN** — General design document
-- **DESIGN_SYSTEM** — Design system specification
-- **UI_GUIDELINES** — UI/UX guidelines
-- **STYLE_GUIDE** — Visual style guide
-- **DESIGN_TOKENS** — Design tokens (colors, typography, spacing)
-- **WIREFRAMES** — Wireframe documentation
-- **PROTOTYPES** — Prototype specifications
-- **COMPONENT_LIBRARY** — Component library documentation
-- **ACCESSIBILITY** — Accessibility guidelines
-- **BRAND_GUIDELINES** — Brand guidelines
-
-### Usage
-
-In interactive mode:
-```
-Command: save-doc DESIGN
-DESIGN content: # Design Overview...
-✅ Saved document: DESIGN
-
-Command: save-doc DESIGN_SYSTEM
-DESIGN_SYSTEM content: # Design System...
-✅ Saved document: DESIGN_SYSTEM
-```
-
-Or prompt at command line:
-```
-Document name: DESIGN_TOKENS
-Content: [paste or type design tokens...]
-✅ Saved document: DESIGN_TOKENS
-```
-
-## Troubleshooting
-
-**"TASK_TOKEN not found"**
-```bash
-export TASK_TOKEN=your-token
-```
-
-**"API error 403"**
-Token invalid. Get new one from `tasks.omerkara.com/login`
-
-**"No tasks found"**
-Check `TASK_PROJECT` environment variable
-
-## Links
-
-- Task Dashboard: https://tasks.omerkara.com
-- API Reference: https://tasks.omerkara.com/task-management.md
-- GitHub: https://github.com/omerfkara/omerkara-sdlc
+- `omerkara_sdlc.py` - Python implementation (reference)
+- `SKILL.md` - This file (your instructions)
+- `README.md` - Full documentation

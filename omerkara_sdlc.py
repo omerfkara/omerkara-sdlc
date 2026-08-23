@@ -59,7 +59,8 @@ async def main():
                 timeout=10.0
             )
             response.raise_for_status()
-            tasks = response.json().get("tasks", [])
+            data = response.json()
+            tasks = data if isinstance(data, list) else data.get("tasks", [])
             print(f"   ✅ Loaded {len(tasks)} open tasks")
             for task in tasks[:5]:  # Show first 5
                 print(f"      • {task.get('title')} (#{task.get('id')})")
@@ -82,7 +83,8 @@ async def main():
                 timeout=10.0
             )
             response.raise_for_status()
-            documents = response.json().get("documents", [])
+            data = response.json()
+            documents = data if isinstance(data, list) else data.get("documents", [])
             doc_names = [doc.get("name") for doc in documents]
             print(f"   ✅ Loaded {len(doc_names)} documents")
             for name in doc_names:

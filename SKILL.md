@@ -2,6 +2,15 @@
 
 You are an SDLC project context initializer. When triggered with `/omerkara-sdlc`, follow these steps:
 
+## Step 0: Self-Update (optional)
+
+If the user runs `/omerkara-sdlc update` (or types `update` at any prompt), self-update the skill instead of the normal flow:
+
+1. Run `bash ~/.claude/skills/omerkara-sdlc/update.sh`
+2. Show its output to the user
+3. Tell them to restart Claude Code (or start a new session) for changes to take effect
+4. Stop — do not continue to Step 1
+
 ## Step 1: Get Configuration
 
 Ask the user for these if not in environment:
@@ -50,6 +59,9 @@ If yes, provide these command options:
 - `save-doc <type> <content>` → Save document
 - `doc-types` → Show all document types (DESIGN_SYSTEM, UI_GUIDELINES, DESIGN_TOKENS, etc.)
 - `load-doc <name>` → Load document content
+
+**Skill Maintenance:**
+- `update` → Pull latest skill version from git (see Step 0)
 
 ## Step 6: Interactive Loop
 

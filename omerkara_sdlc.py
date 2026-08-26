@@ -6,11 +6,8 @@ Supports task and document management
 """
 
 import os
-import json
 import httpx
 import asyncio
-import sys
-from datetime import datetime
 
 async def main():
     """Initialize project context from n8n task API"""
@@ -341,8 +338,3 @@ async def handle_interactive_commands(task_token: str, task_api: str, task_proje
 
 if __name__ == "__main__":
     asyncio.run(main())
-    
-    # Check for command-line arguments
-    if len(sys.argv) > 1:
-        # Could be used for non-interactive mode
-        pass

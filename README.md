@@ -4,19 +4,39 @@ Claude Code skill for project context initialization and task management.
 
 ## Installation
 
-**Via Claude Code marketplace:**
-
-```
-/plugin marketplace add omerfkara/omerkara-sdlc
-/plugin install omerkara-sdlc
-```
-
-**Or via git:**
+Claude Code marketplace discovery doesn't resolve this plugin yet (see `MARKETPLACE_NOTES.md`), so install directly via git. Run these commands, in order, in your terminal:
 
 ```bash
-git clone https://github.com/omerfkara/omerkara-sdlc.git
-ln -s $(pwd)/omerkara-sdlc ~/.claude/skills/
+# 1. Clone the skill into Claude Code's skills directory
+git clone https://github.com/omerfkara/omerkara-sdlc.git ~/.claude/skills/omerkara-sdlc
+
+# 2. Set your task API token (get one from https://tasks.omerkara.com/login)
+export TASK_TOKEN=your-token-from-tasks.omerkara.com
 ```
+
+Then restart Claude Code (or start a new session) so it picks up the skill, and in the Claude Code prompt run:
+
+```
+/omerkara-sdlc
+```
+
+That's it — no build step, no dependency install required beyond `git` and Python 3 with `httpx` (only needed if you run `omerkara_sdlc.py` directly instead of through Claude Code).
+
+### Updating
+
+The skill can update itself from a running session:
+
+```
+/omerkara-sdlc update
+```
+
+Or manually, any time:
+
+```bash
+bash ~/.claude/skills/omerkara-sdlc/update.sh
+```
+
+Both pull the latest `main` from git and print the new version/log. Restart Claude Code afterwards for the update to take effect.
 
 ## Configuration
 

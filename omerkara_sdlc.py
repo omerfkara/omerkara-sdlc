@@ -51,7 +51,10 @@ async def main():
         async with httpx.AsyncClient() as client:
             response = await client.get(
                 f"{task_api}/tasks",
-                params={"project": task_project, "status": "open"},
+                # Omitting "status" returns open tasks (todo + in_progress) per
+                # https://tasks.omerkara.com/task-management.md — "open" is not
+                # a valid value for this param.
+                params={"project": task_project},
                 headers=headers,
                 timeout=10.0
             )
@@ -105,7 +108,8 @@ async def main():
     if response == 'y':
         await handle_interactive_commands(task_token, task_api, task_project)
 
-async def create_task(task_token: str, task_api: str, task_project: str, title: str, priority: str = "medium", assignee: str = None):
+async def create_task(task_token: str, task_api: str, task_project: str, title: str, priority: str = "medium",
+                       description: str = None, phase: str = None, due_date: str = None):
     """Create a new task in n8n"""
     headers = {"X-Task-Token": task_token}
     payload = {
@@ -114,9 +118,13 @@ async def create_task(task_token: str, task_api: str, task_project: str, title: 
         "priority": priority,
         "status": "todo"
     }
-    if assignee:
-        payload["assignee"] = assignee
-    
+    if description:
+        payload["description"] = description
+    if phase:
+        payload["phase"] = phase
+    if due_date:
+        payload["due_date"] = due_date
+
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
@@ -134,8 +142,9 @@ async def create_task(task_token: str, task_api: str, task_project: str, title: 
         return None
 
 
-async def update_task(task_token: str, task_api: str, task_id: str, status: str = None, title: str = None, priority: str = None):
-    """Update an existing task"""
+async def update_task(task_token: str, task_api: str, task_id: str, status: str = None, title: str = None,
+                       priority: str = None, description: str = None, phase: str = None, due_date: str = None):
+    """Update an existing task (partial update)"""
     headers = {"X-Task-Token": task_token}
     payload = {"id": task_id}
     if status:
@@ -144,7 +153,13 @@ async def update_task(task_token: str, task_api: str, task_id: str, status: str 
         payload["title"] = title
     if priority:
         payload["priority"] = priority
-    
+    if description:
+        payload["description"] = description
+    if phase:
+        payload["phase"] = phase
+    if due_date:
+        payload["due_date"] = due_date
+
     try:
         async with httpx.AsyncClient() as client:
             response = await client.put(

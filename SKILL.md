@@ -28,8 +28,12 @@ Ask the user for these if not in environment:
 
 ## Step 3: Load Tasks from n8n API
 
-Make a GET request to: `{TASK_API}/tasks?project={TASK_PROJECT}`
+Make a GET request to: `{TASK_API}/tasks?project={TASK_PROJECT}&include_related=true`
 Headers: `X-Task-Token: {TASK_TOKEN}`
+
+`include_related=true` also returns tasks another project executes but lists this project in
+`related_projects`. Each row has `relation`: `executor` = this project's work; `related` = read only
+(do not start it, change its status or delete it; at most append a dated `## Notlar` line to its description).
 
 Do not send `status=open` — the API returns open tasks (`todo` + `in_progress`) by default
 when `status` is omitted. `open` is not a valid value for this parameter; use `todo`,
@@ -37,7 +41,7 @@ when `status` is omitted. `open` is not a valid value for this parameter; use `t
 
 Display results:
 - List all open tasks
-- Show task IDs and titles
+- Show task IDs and titles; mark `relation: related` rows as "→ <project>" (read only)
 - Group by priority if available
 
 ## Step 4: Load Documents
@@ -115,7 +119,7 @@ https://tasks.omerkara.com/task-management.md and that always takes precedence.
 All requests require header: `X-Task-Token: {TASK_TOKEN}`
 
 **Endpoints:**
-- GET `/tasks?project=X` → List tasks (open — todo + in_progress — by default; pass `status=todo|in_progress|done|all` to filter, "open" is not a valid value)
+- GET `/tasks?project=X&include_related=true` → List tasks (open — todo + in_progress — by default; pass `status=todo|in_progress|done|all` to filter, "open" is not a valid value). `include_related=true` adds related tasks (`relation: related`, read only)
 - POST `/tasks/create` → Create task
 - PUT `/tasks/update` → Partial update task
 - DELETE `/tasks/delete` → Delete task

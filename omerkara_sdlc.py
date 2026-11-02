@@ -54,7 +54,8 @@ async def main():
                 # Omitting "status" returns open tasks (todo + in_progress) per
                 # https://tasks.omerkara.com/task-management.md — "open" is not
                 # a valid value for this param.
-                params={"project": task_project},
+                # include_related adds tasks other projects execute for us (relation: related, read only).
+                params={"project": task_project, "include_related": "true"},
                 headers=headers,
                 timeout=10.0
             )
@@ -63,7 +64,8 @@ async def main():
             tasks = data if isinstance(data, list) else data.get("tasks", [])
             print(f"   ✅ Loaded {len(tasks)} open tasks")
             for task in tasks[:5]:  # Show first 5
-                print(f"      • {task.get('title')} (#{task.get('id')})")
+                mark = f" → {task.get('project')} (salt okunur)" if task.get("relation") == "related" else ""
+                print(f"      • {task.get('title')} (#{task.get('id')}){mark}")
             if len(tasks) > 5:
                 print(f"      ... and {len(tasks) - 5} more")
     except Exception as e:
